@@ -160,11 +160,10 @@ def create_train_val_sequence_cv(X, y, cv=4, lookback=252,
                                   weights=False, focused_periods=252,
                                   replace=False):
     splitter = KFold(cv)
-    sequence_pair_list = []
     
     trim = (0, lookback) if trim == 'default' else trim
     
-    X_array = X.values
+    # X_array = X.values
     y_array = y.values
     y_count = y_array.shape[-1] if len(y_array.shape) == 2 else 1
     for train, test in splitter.split(X, y):
@@ -209,6 +208,6 @@ def create_train_val_sequence_cv(X, y, cv=4, lookback=252,
                           train_index=train_index,
                           test_index=test_index)
 
-        sequence_pair_list.append(sp)
+        # sequence_pair_list.append(sp)
+        yield sp
         
-    return sequence_pair_list
