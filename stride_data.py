@@ -3,11 +3,25 @@ import pandas as pd
 from tensorflow.keras.utils import Sequence
 from sklearn.model_selection import KFold
 
+from typing import List
+
 
 class CombinedSequence(Sequence):
-    def __init__(self, *sequence_list):
+    def __init__(self, *sequence_list, shuffle=False, seed=420, replace=False):
         self.sequence_list: List[Sequence] = sequence_list
         self.sub_sequence_len = tuple(len(s) for s in sequence_list)
+        self.shuffle = shuffle
+        self.replace = replace
+        self.seed = seed
+
+        if self.shuffle:
+            self._random = np.random.RandomState(seed)
+            self._map = self._randomize_map()
+            
+    def _randomize_map(self):
+        return self._random.choice(np.arange(sum(self.sub_sequence_len)), 
+                                   sum(self.sub_sequence_len),
+                                   replace=self.replace)
 
     def __len__(self):
         return sum(self.sub_sequence_len)
@@ -16,7 +30,13 @@ class CombinedSequence(Sequence):
         for sq in self.sequence_list:
             sq.on_epoch_end()
 
+        if self.shuffle:
+            self._map = self._randomize_map()
+
     def __getitem__(self, input_idx):
+        if self.shuffle:
+            input_idx = self._map[input_idx]
+
         for sq, sub_l in zip(self.sequence_list, self.sub_sequence_len):
             if input_idx>=sub_l:
                 input_idx -= sub_l
