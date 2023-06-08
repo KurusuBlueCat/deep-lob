@@ -186,7 +186,7 @@ def create_train_val_sequence_cv(X, y, cv=4, lookback=252,
     # X_array = X.values
     y_array = y.values
     y_count = y_array.shape[-1] if len(y_array.shape) == 2 else 1
-    for train, test in splitter.split(X, y):
+    for train, test in [s for s in splitter.split(X, y)][::-1]:
         test_left = test[0] - trim[0]
         test_right = test[-1] + trim[1]
         train_trimmed = train[(train < test_left) | (train > test_right)]
