@@ -3,15 +3,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 import datetime
 
-target_name = '2_min_tp4_sl2_10yuan_1delay_target'
+target_name = '1_min_tp4_sl4_10yuan_1delay_target'
 
 data = pd.read_csv('data/data_night_shifted_au.csv.gz')
 data = data.set_index('time')
 data.index = pd.to_datetime(data.index, format='%Y-%m-%d %H:%M:%S.%f')
 
-period = 2*60*2
+period = 2*60*1
 delay_period = 1
-sl_ratio = 2
+sl_ratio = 4
 tp_ratio = 4
 
 potential_list = []
@@ -123,7 +123,7 @@ pot_df = pd.DataFrame(potential_list)
 pot_df['date'] = pd.to_datetime(pot_df['date'].astype(str))
 
 ax = pot_df.set_index('date')[['long_signal_pct', 'short_signal_pct']].plot()
-ax.figure.savefig(f'data/{target_name}_imbalance.png')
+ax.figure.savefig(f'label/{target_name}_imbalance.png')
 
 short_wealth = pd.concat(wealth_factor['short'])
 short_wealth.name = 'short_wealth'
