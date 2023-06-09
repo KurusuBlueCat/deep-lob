@@ -198,11 +198,11 @@ class SubSequence(Sequence):
         X_list = []
         y_list = []
         for k, query in query_dict.items():
-            print(query)
+            # print(query)
             X, y = self.sd[k]
             X_list.append(X[query])
             y_list.append(y[query])
-            print(y[query].mean(0))
+            # print(y[query].mean(0))
         return np.vstack(X_list), np.vstack(y_list)
 
     def on_epoch_end(self):
