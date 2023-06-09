@@ -151,6 +151,70 @@ class StrideData(Sequence):
             
         return pd.DataFrame(y, index=idx, columns=y_col)
     
+    
+class SubSequence(Sequence):
+    def __init__(self, sd: StrideData, selected_idx):
+        self.batch_size = sd.batch_size
+        self.sd = sd
+
+        self.key_dict = {}
+        query_dict = {}
+        batch_count = 0
+        sequence_count = 0
+
+        for i in range(len(sd)):
+            target_idx = sd.get_target_indices(i)
+            selected_bool = pd.Index(target_idx).isin(selected_idx)
+            batch_count += selected_bool.sum()
+
+            if batch_count < self.batch_size:
+                query_dict[i] = np.argwhere(selected_bool)[:,0]
+            
+            else:
+                batch_count -= self.batch_size
+                query_arr = np.argwhere(selected_bool)[:,0]
+                cut = query_arr.shape[0] - batch_count
+
+                query_dict[i] = query_arr[:cut]
+                self.key_dict[sequence_count] = query_dict
+
+                query_dict = {}
+                query_dict[i] = query_arr[cut:]
+                sequence_count += 1
+
+    def get_query_dict(self, input_idx):
+        if input_idx < 0:
+            input_idx = len(self.key_dict) - input_idx
+        return self.key_dict[input_idx]
+
+    def __len__(self):
+        len(self.key_dict)
+
+    def __getitem__(self, input_idx):
+        query_dict = self.get_query_dict(input_idx)
+        X_list = []
+        y_list = []
+        for k, query in query_dict.items():
+            print(query)
+            X, y = self.sd[k]
+            X_list.append(X[query])
+            y_list.append(y[query])
+            print(y[query].mean(0))
+        return np.vstack(X_list), np.vstack(y_list)
+
+    def on_epoch_end(self):
+        self.sd.on_epoch_end()
+
+    def get_target_indices(self, input_idx):
+        query_dict = self.get_query_dict(input_idx)
+        indices_list = []
+        for k, query in query_dict.items():
+            idx = pd.Index(self.sd.get_target_indices(k))[query]
+            indices_list.append(idx.values)
+
+        return np.hstack(indices_list)
+    
+    
 class SequencePair:
     def __repr__(self):
         sequence_str = str(self.train_sequence)
