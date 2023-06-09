@@ -191,7 +191,7 @@ class SubSequence(Sequence):
         return self.key_dict[input_idx]
 
     def __len__(self):
-        len(self.key_dict)
+        return len(self.key_dict)
 
     def __getitem__(self, input_idx):
         query_dict = self.get_query_dict(input_idx)
