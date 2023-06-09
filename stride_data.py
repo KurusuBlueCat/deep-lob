@@ -151,10 +151,10 @@ class StrideData(Sequence):
             
         return pd.DataFrame(y, index=idx, columns=y_col)
     
-    
+
 class SubSequence(Sequence):
-    def __init__(self, sd: StrideData, selected_idx):
-        self.batch_size = sd.batch_size
+    def __init__(self, sd: StrideData, selected_idx, batch_size=None, add_last_batch=False):
+        self.batch_size = sd.batch_size if batch_size is None else batch_size
         self.sd = sd
 
         self.key_dict = {}
@@ -181,6 +181,9 @@ class SubSequence(Sequence):
                 query_dict = {}
                 query_dict[i] = query_arr[cut:]
                 sequence_count += 1
+
+        if add_last_batch:
+            self.key_dict[sequence_count] = query_dict
 
     def get_query_dict(self, input_idx):
         if input_idx < 0:
