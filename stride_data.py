@@ -49,7 +49,8 @@ class CombinedSequence(Sequence):
 
 
 class StrideData(Sequence):
-    def __init__(self, x_set, y_set, lookback, batch_size=1, batch_no=None, shuffle=False, replace=False, weights=None):
+    def __init__(self, x_set, y_set, lookback, batch_size=1, batch_no=None, shuffle=False, replace=False, weights=None,
+                 batch_step=1):
         if type(x_set) is pd.Series:
             self.x = x_set.to_frame().values
             self.x_index = x_set.index
@@ -74,6 +75,7 @@ class StrideData(Sequence):
             
         self.lookback = lookback
         self.batch_size = batch_size
+        self.batch_step = batch_step
         
         self.default_length = int(np.floor(((len(self.x) + 1 - self.lookback) / self.batch_size)))
         self.batch_no = int(np.floor(((len(self.x) + 1 - self.lookback) / self.batch_size))) if batch_no is None else batch_no
@@ -88,7 +90,7 @@ class StrideData(Sequence):
         else:
             tile_count = np.ceil(self.batch_no * self.batch_size / self.idx_range.shape[0]).astype(int)
             size = self.batch_no * self.batch_size
-            self.idx_range = np.hstack([self.idx_range for i in range(tile_count)])[:size]
+            self.idx_range = np.hstack([self.idx_range for i in range(0, tile_count, self.batch_step)])[:size]
             
             if shuffle:
                 self.idx_range = np.random.choice(self.idx_range, 
