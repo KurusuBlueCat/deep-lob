@@ -79,7 +79,7 @@ class StrideData(Sequence):
         
         self.default_length = int(np.floor(((len(self.x) + 1 - self.lookback) / self.batch_size)))
         self.batch_no = int(np.floor(((len(self.x) + 1 - self.lookback) / self.batch_size))) if batch_no is None else batch_no
-        self.idx_range = np.arange(0, self.default_length * self.batch_size, self.lookback_step)
+        self.idx_range = np.arange(0, self.default_length * self.batch_size)
         
         self.shuffle = shuffle
         if replace:
@@ -106,7 +106,7 @@ class StrideData(Sequence):
         if idx_input < 0:
             idx_input = len(self) + idx_input
         idx = idx_input * self.batch_size
-        return [np.arange(self.idx_range[idx + i], self.idx_range[idx + i] + self.lookback) for i in range(self.batch_size)]
+        return [np.arange(self.idx_range[idx + i], self.idx_range[idx + i] + self.lookback, self.lookback_step) for i in range(self.batch_size)]
     
     def get_indices(self, idx_input):
         idx_range_list = self._get_idx_range_list(idx_input)
