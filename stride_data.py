@@ -79,7 +79,7 @@ class StrideData(Sequence):
         
         self.default_length = int(np.floor(((len(self.x) + 1 - self.lookback) / self.batch_size)))
         self.batch_no = int(np.floor(((len(self.x) + 1 - self.lookback) / self.batch_size))) if batch_no is None else batch_no
-        self.idx_range = np.arange(0, self.default_length * self.batch_size)
+        self.idx_range = np.arange(0, self.default_length * self.batch_size, self.lookback_step)
         
         self.shuffle = shuffle
         if replace:
@@ -90,7 +90,7 @@ class StrideData(Sequence):
         else:
             tile_count = np.ceil(self.batch_no * self.batch_size / self.idx_range.shape[0]).astype(int)
             size = self.batch_no * self.batch_size
-            self.idx_range = np.hstack([self.idx_range for i in range(0, tile_count, self.lookback_step)])[:size]
+            self.idx_range = np.hstack([self.idx_range for i in range(0, tile_count)])[:size]
             
             if shuffle:
                 self.idx_range = np.random.choice(self.idx_range, 
